@@ -4,8 +4,8 @@ module.exports = (app) => {
     // Create a new Note
     app.post('/accounts', accounts.create);
 
-    // Retrieve all Notes
-    app.get('/controller', accounts.findAll);
+
+
 
     // Retrieve a single Note with noteId
     app.get('/controller/:accountId', accounts.findOne);

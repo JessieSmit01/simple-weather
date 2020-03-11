@@ -1,4 +1,10 @@
 const Account = require('../models/account.model.js');
+require('dotenv').config();
+
+const jwt = require('jsonwebtoken')
+
+const jwtKey = 'W3LC0M3T0M34PP'
+const jwtExpirySeconds = 300
 
 // Create and Save a new accounts
 exports.create = (req, res) => {
@@ -15,32 +21,58 @@ exports.create = (req, res) => {
         password: req.body.password
     });
 
+    const username = account.username;
+
     // Save Note in the database
     const MongoClient = require('mongodb').MongoClient;
-    const uri = "mongodb+srv://root:Pokemon20@cluster0-kxbji.mongodb.net/test?retryWrites=true&w=majority";
+    const uri = process.env.DB_URL;
+
+    console.log(process.env.DB_URL);
     const client = new MongoClient(uri, { useNewUrlParser: true });
     client.connect(err => {
     const collection = client.db("WeatherAppDB").collection("Accounts");
     // perform actions on the collection object
     collection.insertOne(account);
     });
-
-    return res.status(200).send({message: "account created"});
+    const token = jwt.sign({ username }, jwtKey, {
+        algorithm: 'HS256',
+        expiresIn: jwtExpirySeconds
+      })
+      console.log('token:', token)
+    
+      // set the cookie as the token string, with a similar max age as the token
+      // here, the max age is in milliseconds, so we multiply by 1000
+      res.cookie('token', token, { maxAge: jwtExpirySeconds * 1000 })
+      return res.status(200).send({username});
 };
 
-// Retrieve and return all accounts from the database.
-exports.findAll = (req, res) => {
-    Account.find()
-    .then(notes => {
-        res.send(notes);
-    }).catch(err => {
-        res.status(500).send({
-            message: err.message || "Some error occurred while retrieving accounts."
-        });
-    });
-};
 
-// Find a single note with a noteId
+// exports.signIn = (req, res) => {
+//     // Get credentials from JSON body
+//     const { username, password } = req.body
+//     if (!username || !password || users[username] !== password) {
+//       // return 401 error is username or password doesn't exist, or if password does
+//       // not match the password in our records
+//       return res.status(401).end()
+//     }
+  
+//     // Create a new token with the username in the payload
+//     // and which expires 300 seconds after issue
+//     const token = jwt.sign({ username }, jwtKey, {
+//       algorithm: 'HS256',
+//       expiresIn: jwtExpirySeconds
+//     })
+//     console.log('token:', token)
+  
+//     // set the cookie as the token string, with a similar max age as the token
+//     // here, the max age is in milliseconds, so we multiply by 1000
+//     res.cookie('token', token, { maxAge: jwtExpirySeconds * 1000 })
+//     res.end()
+//   }
+
+
+
+
 exports.findOne = (req, res) => {
     Account.findById(req.params.accountId)
     .then(account => {

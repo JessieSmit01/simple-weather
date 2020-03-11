@@ -1,5 +1,20 @@
 <template>
 <b-container>
+    <b-navbar  type="dark" variant="dark">
+        <h2 style="color:white" v-if="Account.userName !== ''">Welcome {{Account.userName}}</h2>
+        <b-navbar-nav class="ml-auto">
+            
+            <b-nav-form>
+                <b-form-input class="mr-sm-2" v-model="user" placeholder="Username"></b-form-input>
+                <b-form-input class="mr-sm-2" v-model="password" placeholder="Password"></b-form-input>
+                <b-button variant="outline-success" class="my-2 my-sm-0" @click="signup">Create Account</b-button>
+                
+                <b-button variant="outline-primary" class="my-2 my-sm-0" @click="login">Sign in</b-button>
+
+            </b-nav-form>
+        </b-navbar-nav>
+    </b-navbar>
+    
     <b-jumbotron header="Simple Weather">
          <i class="fas fa-cloud-sun" style="font-size:48px; padding-bottom: 10px;"></i>
         <b-container fluid>
@@ -24,6 +39,7 @@
             </b-row>
         </b-container>
     </b-jumbotron>
+    
     <b-container v-if="typeof this.weather.main !== 'undefined'">
         <template v-if="weather.main.feels_like < '-1'">
             <b-card  bg-variant="info" text-variant="white">
@@ -107,7 +123,10 @@ export default {
             cityEmpty: '',
             description: '',
             sunrise: '',
-            weather: {}
+            weather: {},
+            Account:{userName:''},
+            user: '',
+            password: ''
         }
     },
     validations:{
@@ -145,9 +164,28 @@ export default {
             this.weather = results;
             this.description = results.weather[0].description;
 
+        },
+        login(){
+            return;
+        },
+        signup(){
+            axios({
+                method: "POST",
+                url: "http://localhost:3000/accounts",
+                
+                data: {
+                    username: this.user,
+                    password: this.password
+
+                }
+                })
+                .then(res => {
+                        this.Account.userName = res.data.username;
+                    });
+            }
         }
     }
-}
+
 </script>
 
 <style scoped>
